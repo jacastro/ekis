@@ -1,0 +1,91 @@
+[
+  {
+    "attendance": "full",   // ['none','full','half']
+    "id": 1,                // student id
+    "name": "Matias",
+    "surname": "Berrueta",
+  },
+]
+,
+[
+  {
+    "date": "2018-10-01",
+    "subjects": [
+      {
+        "id": 1,
+        "name": "Matemática",
+        "classroom": "302",
+        "hour": "10:00"
+      },
+      ...
+    ]
+  }
+  ...
+]
+,
+[
+  {
+    "id": 1,
+    "name": "Matemática",
+    "classroom": "302",
+    "hour": "10:00",
+    "lessons": [
+      {
+        "id": "67e5f2be-af30-4f4d-b709-77b83656d0c7",
+        "day": "2019-05-08",
+        "done": false,
+        "class_number": 1,
+        "topics_count": 3,
+        "title": "Inicio de la primer guerra mundial",
+        "description": "",
+        "picture_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrXY3vnXt16WGcCgDmhzVTHlZUKcQz_q6C2pcnuaEH64et74yI",
+        "exam": true,  
+        "homework": false,
+      },
+    ]
+  },
+  ...
+]
+,
+[
+  {
+    "id": "67e5f2be-af30-4f4d-b709-77b83656d0c7",
+    "day": "2019-05-08",
+    "done": false,
+    "class_number": 1,
+    "title": "Inicio de la primer guerra mundial",
+    "description": "",
+    "picture_url": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQrXY3vnXt16WGcCgDmhzVTHlZUKcQz_q6C2pcnuaEH64et74yI",
+    "exam": true,  
+    "homework": false,
+    "topics": [
+      {
+        "title": "Causas de la guerra",
+        "text": "bla bla bla"
+      },
+      ...
+    ]
+  },
+  ...
+]
+,
+{
+  "id": "67e5f2be-af30-4f4d-b709-77b83656d0c7",
+  "students": [
+    {
+      "id": 1,                
+      "name": "Matias",
+      "surname": "Berrueta",
+      "done": true,
+      "result": 7
+    }
+  ],
+  "questions": [
+    {
+      "id": 1,
+      "question": "¿Cómo te llamas",
+      "options": ["a", "b", "c"]
+    },
+    ...
+  ]
+},
