@@ -10,7 +10,15 @@ export const subjects = {
   sunday: [],
 };
 
-export const createSubjects = () => Object.assign({}, subjects);
+export const createSubjects = () => ({ 
+  monday: [],
+  tuesday: [],
+  wednesday: [],
+  thursday: [],
+  friday: [], 
+  saturday: [], 
+  sunday: [],
+});
 
 const weekdays = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday","sunday","monday","tuesday","wednesday","thursday","friday","saturday"]
 

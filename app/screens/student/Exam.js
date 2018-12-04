@@ -162,7 +162,7 @@ export class ExamScreen extends React.Component {
                 fill={this.state.timer}
                 tintColor={this.state.timer < 75 ? Colors.green30 : Colors.orange30 }
                 backgroundColor={Colors.dark80}
-                style={{ marginTop: 20,}}
+                style={{ marginBottom: 20,}}
               >{
                 (fill) => (
                   timerNum == 0 && loadingAddingAnswer ? <ActivityIndicator color={Colors.orange20} /> : <Text text40 style={{color: this.state.timer < 75 ? Colors.green20 : Colors.orange20 }} >

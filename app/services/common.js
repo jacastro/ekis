@@ -2,7 +2,7 @@ import { AsyncStorage } from "react-native"
 import { post } from './rest';
 
 const routers = {
-  Preceptor: "PreceptorApp",
+  Manager: "PreceptorApp",
   Student: "StudentApp",
   Teacher: "TeacherApp",
 }
