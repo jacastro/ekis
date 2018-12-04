@@ -87,7 +87,7 @@ export class LessonScreen extends React.Component {
       [
         {text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
         {text: 'Continuar', onPress: () => this.props.navigation.navigate('Exam', { 
-          lesson,
+          lesson: this.state.lesson,
           onFinish: () => {
             this.loadLesson(this.state.currentClass)
           }
@@ -167,8 +167,6 @@ export class LessonScreen extends React.Component {
     const studentExam = studentExams[0];
     const loading = this.state.loadingFeedback || this.state.loading || this.state.loadingAttendance;
 
-    console.log("studentExam", studentExam)
-
     return (
       <View style={{flex: 1, flexDirection: 'column'}}>
         <View style={{ flexDirection: 'row' }}>
@@ -212,7 +210,7 @@ export class LessonScreen extends React.Component {
                 style={style.examButton}
                 text70
                 label={this.state.loading ? "" : "Realizar examen"}
-                onPress={() => resolveExam }
+                onPress={() => this.resolveExam() }
                 title="Examen"
                 disabled={this.state.loading}
               />
@@ -230,7 +228,7 @@ export class LessonScreen extends React.Component {
                 title="Examen de clase"
                 accessory={studentExam ? null : "DisclosureIndicator"}
                 detail={!studentExam ? "Resolver" : studentExam.exam.title}
-                onPress={() => studentExam ? navigation.push('ViewExam', { exam: studentExam }) : this.resolveExam()}
+                onPress={() => studentExam ? /* navigation.push('ViewExam', { exam: studentExam }) */ null : this.resolveExam()}
               />}
               <Cell
                 cellStyle="RightDetail"
@@ -248,7 +246,7 @@ export class LessonScreen extends React.Component {
                 detail={feedback ? `${feedback.value}⭐` : ""}
                 title={feedback ? "Clase evaluada" : "Evaluar clase" + (lesson.teacher ? ` dictada por ${lesson.teacher.first_name} ${lesson.teacher.last_name}` : "")}
                 titleTextColor="#007AFF"
-                onPress={feedback ? null : () => navigation.navigate('Feedback', { 
+                onPress={() => feedback ? null : navigation.navigate('Feedback', { 
                   lesson,
                   onFinish: () => {
                     this.loadLesson(this.state.currentClass)
