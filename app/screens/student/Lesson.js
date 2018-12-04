@@ -86,7 +86,7 @@ export class LessonScreen extends React.Component {
       'No podrás salir del examen antes de finalizar el mismo. Tampoco podrás cambiar de pestaña o el examen se anulará',
       [
         {text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-        {text: 'Continuar', onPress: () => navigation.navigate('Exam', { 
+        {text: 'Continuar', onPress: () => this.props.navigation.navigate('Exam', { 
           lesson,
           onFinish: () => {
             this.loadLesson(this.state.currentClass)
