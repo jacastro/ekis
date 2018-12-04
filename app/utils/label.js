@@ -8,6 +8,7 @@ module.exports = {
   tomorrow: "Mañana",
   today: "Hoy",
   Preceptor: "Preceptor",
+  Manager: "Preceptor",
   Teacher: "Docente",
   Student: "Alumno",
 }

@@ -6,7 +6,7 @@ export const getStudents = (course) => get(`students`);
 
 export const getAttendance = async (course, date) => {
   const students = await getStudents(course);
-  const attendance = await get(`courses/${course}/assists/?date=${date}`);
+  const attendance = await get(`courses/${course}/attendances/?date=${date}`);
 
   const response = students.map(student => {
     const att = attendance.filter(att => att.student.id === student.id);
@@ -27,10 +27,10 @@ export const getAttendance = async (course, date) => {
 
 export const saveAttendance = (course, date, student, value, assist) => {
   if(value === "none"){
-    if(assist) return del(`assists/${assist}`);
+    if(assist) return del(`attendances/${assist}`);
     else throw Error("No se encuentra la asistencia");
   }
-  return post(`courses/${course}/assists`, {
+  return post(`courses/${course}/attendances`, {
     date,
     present_code: value,
     student_id: student,
