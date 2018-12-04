@@ -19,6 +19,7 @@ import { ProfileScreen } from '../screens/Profile';
 import { LessonsScreen } from '../screens/student/Lessons';
 import { LessonScreen } from '../screens/student/Lesson';
 import { ExamScreen } from '../screens/student/Exam';
+import { ViewExamScreen } from '../screens/student/ViewExam';
 import { QualificationReportScreen } from '../screens/student/QualificationReport';
 import { ProgramScreen } from '../screens/student/Program';
 import { FeedbackScreen } from '../screens/student/Feedback';
@@ -96,6 +97,7 @@ const TabNav = createBottomTabNavigator(
 TabNav.navigationOptions = ({ navigation }) => {
   return {
     title: navigation.state.routes[navigation.state.index].routeName,
+    headerLeft: <Button onPress={() => navigation.navigate('MyProfile')} title="Mi Perfil"/>,
   };
 };
 
@@ -103,13 +105,8 @@ const MenuNavigation = createStackNavigator({
   Root: {
     screen: TabNav,
   },
-  Lesson: {
-    screen: LessonScreen,
-    path: '/clase/:name',
-    navigationOptions: ({ navigation }) => ({
-      title: `${navigation.state.params.name}`,
-    }),
-  },
+  Lesson: LessonScreen,
+  ViewExam: ViewExamScreen
 });
 
 export default createStackNavigator(

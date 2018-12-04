@@ -1,18 +1,19 @@
 import React, {Component} from 'react';
 import { createBottomTabNavigator } from 'react-navigation';
-import {SwipeableFlatList, StyleSheet, Alert, Image, ScrollView, Switch} from 'react-native';
+import {ActivityIndicator, StyleSheet, Alert, Image, ScrollView, Switch, Button,DatePickerIOS,AlertIOS,RefreshControl} from 'react-native';
 import { Cell, TableView, Section, Separator } from 'react-native-tableview-simple';
 import { Ionicons } from '@expo/vector-icons';
-import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput} from 'react-native-ui-lib';//eslint-disable-line
-import * as Animatable from 'react-native-animatable';
+import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen} from 'react-native-ui-lib';//eslint-disable-line
+import { getLesson, updateLesson, deleteLesson } from '../../services/teacher';
 
 export class LessonScreen extends Component {
   static navigationOptions = ({ navigation }) => {
+    const lesson = navigation.getParam('lesson', {});
     return {
-      title:  `Clase ${navigation.getParam('lesson', {}).id + 1}`, 
+      title:  `Clase ${lesson.class_number}`, 
       headerRight: (
         <Button
-          onPress={() => console.log("save")}
+          onPress={navigation.getParam('saveLesson',() => console.log("unmounted"))} 
           title="Guardar"
         />
       ),
@@ -21,17 +22,80 @@ export class LessonScreen extends Component {
 
   constructor(props) {
     super(props);
-
+    const lessonShot = props.navigation.getParam('lesson', {});
+    const date = lessonShot.date.split("-")
     this.state = {
-      lesson: props.navigation.getParam('lesson', {}),
-      program: props.navigation.getParam('program', {}),
+      lessonShot,
+      loading: true,
+      date: new Date(date[0],date[1]-1,date[2]),
+      topics_count: lessonShot.topics_count,
+      refreshing: false,
     };
   }
 
+  componentDidMount() {
+    this.props.navigation.setParams({ saveLesson: this._onSave });
+    this.loadData();
+  }
+
+  loadData = () => {
+    this.setState({ loading: true })
+    getLesson(this.state.lessonShot.id).then((lessonApi) => {
+      this.setState({ lessonApi, loading: false, refreshing: false })
+    })
+  }
+
+  onRefresh = () => {
+    this.setState({ refreshing: true })
+    this.loadData();
+  }
+
+  _onSave = () => {
+    const { lessonShot, lessonChanges } = this.state;
+    this.setState({ loading: true });
+    updateLesson(lessonShot.id, lessonChanges).then(lessonApi => {
+      this.setState({ lessonApi, loading: false });
+      this._onChange();
+      this.props.navigation.goBack();
+    })
+  };
+
+  _onChange = () => {
+    const { lessonShot, topics_count, lessonChanges } = this.state;
+
+    this.props.navigation.getParam('onChange', {})({ 
+      ...lessonShot,
+      ...lessonChanges,
+      topics_count
+    });
+  };
+
+  setDate = (newDate) => {
+    const chosenDate = newDate.toJSON();
+    const date = chosenDate.substring(0,chosenDate.indexOf("T"))
+    this.setState({ 
+      date: newDate,
+      lessonChanges: { ...this.state.lessonChanges, date },
+    })
+  }
+
   render() {
-    const lesson = this.props.navigation.getParam('lesson', {});
+    const { lessonShot, lessonApi, lessonChanges, loading } = this.state;
+    const lesson = { 
+      ...lessonShot, 
+      ...lessonApi,
+      ...lessonChanges, 
+    }
+
     return (
-      <ScrollView>
+      <ScrollView 
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.onRefresh}
+          />
+        }
+      >
         <TableView>
           <Section header="Información de clase" sectionTintColor='transparent'>
             <Cell
@@ -42,6 +106,7 @@ export class LessonScreen extends Component {
                   placeholder="Escribe un título"
                   value={lesson.title}
                   titleColor={{default: '#000000', error: 'red', focus: 'blue'}}
+                  onChangeText={title => this.setState({ lessonChanges: { ...lessonChanges, title } })}
                   hideUnderline 
                 />
               }
@@ -53,52 +118,67 @@ export class LessonScreen extends Component {
                   containerStyle={{marginBottom: -20,paddingBottom: 0, flex: 1}}
                   placeholder="Escribe una descripción"
                   value={lesson.description}
-                  hideUnderline 
+                  onChangeText={description => this.setState({ lessonChanges: { ...lessonChanges, description } })}
+                  hideUnderline
+                  expandable
+                  numberOfLines={1}
                 />
               }
+              contentContainerStyle={{ paddingVertical: 4 }}
             />
 
-            
-            <Cell
+            { loading ? <Cell
+              title="Buscando examen"
+              cellAccessoryView={<ActivityIndicator />}
+            /> : <Cell
               title="Examen"
               accessory="DisclosureIndicator"
               cellStyle="RightDetail"
-              detail={lesson.exam ? 'Activado' : 'No'}
+              detail={lesson.exam.enabled ? 'Activado' : 'No'}
               onPress={() => this.props.navigation.navigate('Exam', {
                 lesson,
-                onSaveExam: (exam) => {
-                  lesson.exam = exam.enabled;
-                  this.props.navigation.setParams({ lesson })
-                  //this.props.navigation.getParam('onChange', {})(lesson)
+                onSaveExam: (examEnabled) => {
+                  lessonApi.exam.enabled = examEnabled;
+                  this.setState({ lessonApi })
                 }
               })}
-            />
+            />}
+            
             <Cell
               title="Finalizado"
               cellStyle="Basic"
-              cellAccessoryView={<Switch 
-                value={lesson.done} />}
+              cellAccessoryView={<Switch
+                value={lesson.done} 
+                onValueChange={done => this.setState({ lessonChanges: { ...lessonChanges, done } })}
+              />}
               contentContainerStyle={{ paddingVertical: 4 }}
             />
             <Cell
               cellStyle="Basic"
               title="Imagen de clase"
               accessory="DisclosureIndicator"
-              onPress={() => this.props.navigation.navigate('Exam', {
-                lesson,
-              })}
+              onPress={() => AlertIOS.prompt(
+                'Cambiar imagen',
+                'Ingresa la url de la nueva imagen para continuar',
+                picture_url => this.setState({ lessonChanges: { ...lessonChanges, picture_url } })
+              )}
               image={
                 <Image
                   style={{ borderRadius: 5 }}
-                  source={{
-                    uri: lesson.image,
-                  }}
+                  source={{ uri: lesson.picture_url }}
                 />
               }
             />
           </Section>
-          <Section header="Temas" sectionTintColor='transparent'>
-            {lesson.topics.map((topic, index) => (
+
+          <DatePickerIOS
+            mode="date"
+            date={this.state.date}
+            onDateChange={(date) => this.setDate(date)}
+          />
+
+          { loading ? <LoaderScreen /> : <Section header="Temas" sectionTintColor='transparent'>
+            {lesson.topics && lesson.topics.map((topic, index) => (
               <Cell
                 key={topic.title}
                 cellStyle="Basic"
@@ -106,11 +186,14 @@ export class LessonScreen extends Component {
                 accessory="DisclosureIndicator"
                 onPress={() => this.props.navigation.navigate('EditTopic', { 
                   topic, 
-                  program: this.state.program,
                   onSave: (topic) => {
                     lesson.topics[index] = topic;
-                    this.props.navigation.setParams({ lesson })
-                    this.props.navigation.getParam('onChange', {})(lesson)
+                    this.props.navigation.setParams({ lesson });
+                    this.props.navigation.getParam('onChange', {})(lesson);
+                  },
+                  onDelete: () => {
+                    lesson.topics.splice(index, 1),
+                    this.setState({ topics_count: lesson.topics.length }, this._onChange);
                   }
                 })}
               />
@@ -122,13 +205,33 @@ export class LessonScreen extends Component {
               titleTextColor="#007AFF"
               accessory="DisclosureIndicator"
               onPress={() => this.props.navigation.navigate('EditTopic', {
-                program: this.state.program,
+                lesson,
                 onSave: (topic) => {
-                  lesson.topics.push(topic);
-                  this.props.navigation.setParams({ lesson })
-                  this.props.navigation.getParam('onChange', {})(lesson)
+                  const topics_count = lesson.topics.push(topic);
+                  this.props.navigation.setParams({ lesson });
+                  this.props.navigation.getParam('onChange', {})(lesson);
+                  this.setState({ topics_count }, this._onChange);
                 }
               })}
+            />
+          </Section> }
+
+          <Section sectionTintColor='transparent'>
+            <Cell
+              title={`Eliminar clase`}
+              titleTextColor={Colors.red10}
+              accessory="DisclosureIndicator"
+              onPress={() => Alert.alert(
+                `Eliminar clase ${lesson.class_number}`,
+                `¿Estás seguro que deseas eliminar la clase sobre ${lesson.title}?`,
+                [
+                  {text: 'No', onPress: () => console.log("no se borró")},
+                  {text: 'Si, borrar', onPress: () => deleteLesson(lesson.id).then(() => {
+                    this.props.navigation.getParam('deleteLesson', {})( lesson );
+                    this.props.navigation.goBack();
+                  })},
+                ],
+              )}
             />
           </Section>
         </TableView>

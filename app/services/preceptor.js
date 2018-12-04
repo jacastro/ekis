@@ -37,36 +37,3 @@ export const saveAttendance = (course, date, student, value, assist) => {
   });
   
 };
-
-/*export const getStudents = async () => [
-  {
-    id: 1,
-    name: 'Matias',
-    surname: 'Berrueta',
-    attendance: 'full'
-  },
-  {
-    id: 2,
-    name: 'Javier',
-    surname: 'Castro',
-    attendance: 'full'
-  },
-  {
-    id: 3,
-    name: 'Erica',
-    surname: 'Nuñez',
-    attendance: 'none'
-  },
-  {
-    id: 4,
-    name: 'Florencia',
-    surname: 'Otero',
-    attendance: 'none'
-  },
-  {
-    id: 5,
-    name: 'Alberto',
-    surname: 'Sal',
-    attendance: 'full'
-  },
-];*/

@@ -1,63 +1,12 @@
 import React from 'react';
-import RNcmp, { FlatList, ScrollView, ActivityIndicator, View, Text, Image } from 'react-native';
-
+import RNcmp, { FlatList, ScrollView, ActivityIndicator, Image, RefreshControl } from 'react-native';
+import {View, TextInput, Text, Button, ListItem, LoaderScreen, Colors, Badge} from 'react-native-ui-lib';
 import { Cell, Separator, TableView, Section } from 'react-native-tableview-simple';
 import { Ionicons } from '@expo/vector-icons';
 import {RkCard,RkText,RkButton, RkTheme, RkTextInput} from 'react-native-ui-kitten';
 
-RkTheme.setType('RkCard', 'story', {
-  img: {
-    height: 100,
-    opacity: 0.7
-  },
-  header: {
-    alignSelf: 'center'
-  },
-  content:{
-    alignSelf:'center'
-  }
-});
-RkTheme.setType('RkTextInput', 'frame', {
-  input: {
-    backgroundColor: '#000',
-    marginLeft: 0,
-    marginHorizontal: 0,
-    borderRadius: 5
-  },
-  color: 'gray',
-  backgroundColor: 'gray',
-  borderRadius: 10,
-  container: {
-    paddingHorizontal: 20
-  }
-});
-
-const data = {
-  Hoy: [
-    {
-      title: 'Matemática',
-      notifications: 3,
-      hour: '10:00am'
-    },
-    {
-      title: 'Lengua',
-      notifications: 0,
-      hour: '12:00am'
-    },
-  ],
-  Mañana: [
-    {
-      title: 'Educación Física',
-      notifications: 0,
-      hour: '9:00am'
-    },
-    {
-      title: 'Ciencias Sociales',
-      notifications: 0,
-      hour: '10:30am'
-    },
-  ],
-};
+import { formatDayName, getSortedDays, createSubjects } from './../../utils/dates';
+import { getSubjects } from '../../services/student';
 
 export class LessonsScreen extends React.Component {
   static navigationOptions = ({ navigation }) => {
@@ -69,36 +18,72 @@ export class LessonsScreen extends React.Component {
 
   constructor(props) {
     super(props);
-    this.state = {}
+    this.state = {
+      loading: true,
+      subjects: [],
+    }
   }
+
+  componentDidMount = () => {
+    this.loadData();
+  };
+
+  loadData = () => {
+    this.setState({ loading: true })
+    getSubjects().then((data) => {
+      const subjects = createSubjects();
+      data.forEach(subject => {
+        subjects[subject.day].push(subject);
+      });
+
+      this.setState({ subjects, loading: false, subjectsCount: data.length })
+    })
+  };
 
   render() {
     const navigation = this.props.navigation;
+
     return (
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.loading}
+            onRefresh={this.loadData}
+          />
+        }
+      >
         <TableView>
-          {Object.keys(data).map(function(day, index) {
-            const clases = data[day];
-            return <Section header={day} key={day} sectionTintColor='transparent'>
-              {clases.map((clase) =>
+          {this.state.subjectsCount > 0 && getSortedDays().map((day) => 
+            this.state.subjects[day].length > 0 && <Section key={day} header={formatDayName(day)} sectionTintColor='transparent'>
+              {this.state.subjects[day].map((subject) => 
                 <Cell
-                  key={clase.title}
                   cellStyle="RightDetail"
-                  detail={clase.hour}
-                  title={clase.title}
+                  detail={`${subject.hour}`}
+                  title={`${subject.name}`}
                   accessory="DisclosureIndicator"
-                  cellImageView={clase.notifications > 0 ? <Ionicons
-                    name="ios-notifications"
-                    size={26}
-                    style={{ marginRight: 10, }}
-                  /> : null}
-                  onPress={() => navigation.navigate('Lesson', { name: clase.title })}
-                />
-              )}
+                  key={subject.id}
+                  id={subject.name}
+                  cellImageView={<Badge 
+                    containerStyle={{marginRight: 5}}
+                    label={subject.course.classroom} 
+                    backgroundColor={Colors.blue50}/>}
+                  onPress={() => this.props.navigation.push('Lesson', { subject })}
+                />)}
             </Section>
-          })}
+          )}
         </TableView>
+        { this.state.subjectsCount == 0 && 
+          <Text marginT-40 text70 style={{ color: Colors.dark30, textAlign: "center" }}>No tenés materias asignadas</Text>
+        }
       </ScrollView>
     )
   }
 };
+
+/*
+cellImageView={clase.notifications > 0 ? <Ionicons
+                    name="ios-notifications"
+                    size={26}
+                    style={{ marginRight: 10, }}
+                  /> : null}
+*/

@@ -2,14 +2,13 @@ import React from 'react';
 import { ScrollView, Switch, ActivityIndicator } from 'react-native';
 import { Cell, TableView, Section } from 'react-native-tableview-simple';
 import { View, Button, Text, ListItem, LoaderScreen, Colors} from 'react-native-ui-lib';
-import { logout } from './../services/common';
+import { logout, getUser } from './../services/common';
+import label from './../utils/label';
 
 export class ProfileScreen extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      first_name: 'Javier',
-    }
+    this.state = {}
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -19,10 +18,7 @@ export class ProfileScreen extends React.Component {
   };
 
   componentDidMount = () => {
-    /*getAttendance(this.state.course, this.state.date).then((students) => {
-      this.props.navigation.setParams({'loading': false});
-      this.setState({ students })
-    })*/
+    getUser().then(data => this.setState(data))
   };
 
   logout = () => {
@@ -33,8 +29,13 @@ export class ProfileScreen extends React.Component {
     return (
       <View>
         <View padding-30>
-          <Text text30>{this.state.first_name}</Text>
-          <Text text60>Preceptor</Text>
+          <Text text30>{this.state.first_name} {this.state.last_name}</Text>
+          <Text text60>{label[this.state.type]}</Text>
+          {this.state.course && <Text text70>
+            Curso {this.state.course.name} - 
+            Turno {label[this.state.course.shift]} - 
+            Aula {this.state.course.classroom}
+          </Text>}
         </View>
         <Button
           fullWidth

@@ -1,15 +1,15 @@
 import React, {Component} from 'react';
 import { createBottomTabNavigator } from 'react-navigation';
-import {SwipeableFlatList, StyleSheet, Alert, Image, Switch} from 'react-native';
+import {RefreshControl, StyleSheet, Alert, ScrollView, Switch,ActivityIndicator} from 'react-native';
 import { Cell, TableView, Section, Separator } from 'react-native-tableview-simple';
 import { Ionicons } from '@expo/vector-icons';
-import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen} from 'react-native-ui-lib';//eslint-disable-line
+import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen, Toast} from 'react-native-ui-lib';//eslint-disable-line
 import * as Animatable from 'react-native-animatable';
-
+import { getExam, enableExam, getStudentExams } from '../../services/teacher';
 export class ExamTeacherScreen extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
-      title:  `Examen clase ${navigation.getParam('lesson', {}).id + 1}`, 
+      title:  `Examen`, 
     };
   };
 
@@ -17,75 +17,108 @@ export class ExamTeacherScreen extends Component {
     super(props);
 
     this.state = {
-      enabled: this.props.navigation.getParam('lesson', {}).exam,
-      loading: false,
-      questions: [
-        {
-          id: 1,
-          text: '¿Cuánto es 2x2?',
-          options: ['2','3','4'],
-        },
-        {
-          id: 2,
-          text: '¿Cómo te llamás?',
-          options: ['a','b','c']
-        },
-        {
-          id: 3,
-          text: '¿Cuántos años tenés?',
-          options: ['22','23','24']
-        }
-      ],
+      //enabled: this.props.navigation.getParam('lesson', {}).exam,
+      enabled: true,
+      loading: true,
+      refreshing: false,
+      lesson: props.navigation.getParam('lesson', {}),
+      studentExams: []
     };
   }
 
+  componentDidMount() {
+    this.loadData();
+  }
+
+  loadData = () => {
+    this.setState({ loading: true })
+    getExam(this.state.lesson.exam.id).then((exam) => {
+      getStudentExams(this.state.lesson.exam.id).then(studentExams => {
+        this.setState({ ...exam, loading: false, refreshing: false, studentExams })
+      }) 
+    })
+  }
+
+  onRefresh = () => {
+    this.setState({ refreshing: true })
+    this.loadData();
+  }
+
   enableExam = (value) => {
-    
-    // make call
-    this.setState({ loading: true, enabled: value });
-    setTimeout(() => {
-      this.setState({ loading: false });
-      this.props.navigation.getParam('onSaveExam', {})(this.state);
-    }, 1000);
+    this.setState({ enabled: value });
+    enableExam(this.state.id, value).then(() => {
+      this.props.navigation.getParam('onSaveExam', {})( value );
+    });
   }
 
   render() {
-    const lesson = this.props.navigation.getParam('lesson', {});
+    const { lesson, enabled, questions, loading, id, studentExams } = this.state;
+    const shouldEnable = questions && questions.length >= 3;
+    const shouldEdit = studentExams && studentExams.length == 0;
+
     return (
-      <View flex>
-        {this.state.loading && <LoaderScreen
-          overlay
-          backgroundColor={Colors.rgba(Colors.dark80, 0.85)}
-        />}
+      <ScrollView 
+        refreshControl={
+          <RefreshControl
+            refreshing={this.state.refreshing}
+            onRefresh={this.onRefresh}
+          />
+        }
+      >
         <TableView>
           <Section sectionTintColor='transparent'>
             <Cell
               title={`Clase: ${lesson.title}`}
               cellStyle="Basic"
             />
-            <Cell
+            { loading ? <Cell
+              title="Buscando examen"
+              cellAccessoryView={<ActivityIndicator />}
+              contentContainerStyle={{ paddingVertical: 4 }}
+            /> : <Cell
               title="Activar examen"
               cellStyle="Basic"
               cellAccessoryView={<Switch 
-                value={this.state.enabled}
+                value={shouldEnable && enabled == true}
+                disabled={!shouldEnable || !shouldEdit}
                 onValueChange={value => this.enableExam(value)}
               />}
               contentContainerStyle={{ paddingVertical: 4 }}
+            />}
+            <Toast
+              visible={(!loading && !shouldEnable)}
+              position="relative"
+              message="Debes haber cargado por lo menos 3 preguntas para habilitar el examen"
+              backgroundColor={Colors.yellow20}
+              color={Colors.white}
+            />
+            <Toast
+              visible={!shouldEdit}
+              position="relative"
+              message="No puedes editar el examen porque ya ha sido resuelto por lo menos una vez"
+              backgroundColor={Colors.blue20}
+              color={Colors.white}
             />
           </Section>
-          {this.state.enabled && <Section header='Preguntas' sectionTintColor='transparent'>
-            {this.state.questions.map((question, index) => (
+          { questions && <Section header='Preguntas' sectionTintColor='transparent'>
+            {questions.map((question, index) => (
               <Cell
                 key={question.id}
                 cellStyle="Basic"
-                title={question.text}
+                title={question.question}
                 accessory="DisclosureIndicator"
-                onPress={() => this.props.navigation.navigate('EditExam', { 
+                onPress={() => this.props.navigation.navigate('EditExamQuestion', { 
+                  examId: id,
                   question, 
-                  onSave: (topic) => {
-                    lesson.topics[index] = topic;
-                    this.props.navigation.setParams({ lesson })
-                    this.props.navigation.getParam('onChange', {})(lesson)
+                  shouldDelete: !enabled || questions.length > 3 ,
+                  shouldEdit,
+                  onSave: (question) => {
+                    questions[index] = question;
+                    this.setState({ questions })
+                  },
+                  onDelete: () => {
+                    questions.splice(index, 1),
+                    this.setState({ questions })
                   }
                 })}
               />
@@ -96,17 +129,28 @@ export class ExamTeacherScreen extends Component {
               title="Agregar"
               titleTextColor="#007AFF"
               accessory="DisclosureIndicator"
-              onPress={() => this.props.navigation.navigate('EditExam', {
-                onSave: (topic) => {
-                  lesson.topics.push(topic);
-                  this.props.navigation.setParams({ lesson })
-                  this.props.navigation.getParam('onChange', {})(lesson)
+              onPress={() => this.props.navigation.navigate('EditExamQuestion', {
+                examId: id,
+                onSave: (question) => {
+                  questions.push(question);
+                  this.setState({ questions })
                 }
               })}
             />
           </Section>}
+          <Section header='Exámenes resueltos' sectionTintColor='transparent'>
+            {studentExams.map(studentExam => (
+              <Cell
+                key={studentExam.id}
+                cellStyle="Basic"
+                title={studentExam.id}
+                accessory="DisclosureIndicator"
+                onPress={() => this.props.navigation.navigate('EditExamQuestion', { exam: studentExam })}
+              />
+            ))}
+          </Section>
         </TableView>
-      </View>
+      </ScrollView>
     );
   }
 }

@@ -29,3 +29,13 @@ export const post = async(url, params) => {
     console.error(error);
   }
 }
+
+export const put = async(url, params) => {
+  try {
+    console.log(`PUT: https://uade-sem-int-tpo-api.herokuapp.com/${url}`, params)
+    const result = await axios.put(`https://uade-sem-int-tpo-api.herokuapp.com/${url}`, params);
+    return result.data;
+  } catch (error) {
+    console.error(error);
+  }
+}

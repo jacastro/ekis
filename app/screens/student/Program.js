@@ -1,10 +1,10 @@
 import React from 'react';
-import { ScrollView, StatusBar, Text, SectionList,FlatList, View, Alert, AppState, Button, Dimensions, Image } from 'react-native';
+import { ScrollView, ActivityIndicator, Text, SectionList,FlatList, View, Alert, AppState, Button, Dimensions, Image } from 'react-native';
 import { Cell, Section, TableView } from 'react-native-tableview-simple';
 import ProgressBarAnimated from 'react-native-progress-bar-animated';
 import { Stars } from './../../components/Stars';
-
 import { Ionicons } from '@expo/vector-icons';
+import { getLesson } from '../../services/student';
 
 export class ProgramScreen extends React.Component {
   item = {
@@ -39,8 +39,25 @@ export class ProgramScreen extends React.Component {
     exam: false,
     done: true
   }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      ...props.navigation.getParam('lesson', {}),
+      loading: false,
+    }
+  }
+
+  componentDidMount() {
+    if (!this.state.topics)
+      this.setState({ loading: true });
+      getLesson(this.state.id).then((lesson) => {
+        this.setState({ ...lesson, loading: false });
+      })
+  }
+
   render() {
-    const item = this.item;
+    const item = this.state;
     return (
       <ScrollView style={style.main}>
         <View style={style.header}>
@@ -51,12 +68,14 @@ export class ProgramScreen extends React.Component {
             style={style.header_icon}
           />}
         </View>
-        {item.image && <Image source={{uri: item.image}} style={style.image} />}
+        {item.picture_url && <Image source={{uri: item.picture_url}} style={style.image} />}
+        <Text style={style.topic_text}>{ item.description }</Text>
+        { this.state.loading && <ActivityIndicator/> }
         <View style={style.content}>
-          {item.topics.map(topic =>
+          {item.topics && item.topics.map(topic =>
             <View style={style.topic} key={topic.title}>
               <Text style={style.topic_title}>{ topic.title }</Text>
-              {topic.text.map(text => <Text key={text} style={style.topic_text}>{ text }</Text>)}
+              <Text style={style.topic_text}>{ topic.description }</Text>
             </View>
           )}
         </View>
@@ -108,11 +127,11 @@ const style = {
     alignSelf: 'flex-start',
     fontWeight: '600',
     paddingTop: 24,
-    paddingBottom: 10,
   },
   topic_text: {
     fontSize: 18,
     alignSelf: 'flex-start',
+    marginTop: 10,
     marginBottom: 10,
     color: '#999',
   },
