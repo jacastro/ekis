@@ -80,6 +80,23 @@ export class LessonScreen extends React.Component {
     this.loadLesson(slideIndex);
   }
 
+  resolveExam = () => {
+    Alert.alert(
+      '¡Atención!',
+      'No podrás salir del examen antes de finalizar el mismo. Tampoco podrás cambiar de pestaña o el examen se anulará',
+      [
+        {text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
+        {text: 'Continuar', onPress: () => navigation.navigate('Exam', { 
+          lesson,
+          onFinish: () => {
+            this.loadLesson(this.state.currentClass)
+          }
+        })},
+      ],
+      { cancelable: false }
+    )
+  }
+
   loadLesson = (slideIndex) => {
     const lesson = this.state.subject.lessons[slideIndex];
     this.setState({ lesson, loading: true, loadingAttendance: true, loadingFeedback: true })
@@ -143,12 +160,14 @@ export class LessonScreen extends React.Component {
   }
 
   render () {
-    console.log(this.state.subject)
     const navigation = this.props.navigation;
     const { subject, lesson, attendance, studentExams, loadingFeedback, feedback } = this.state;
     const attendanceMsg = attendance.length > 0 ? attendance[0].present_code : "Ausente";
     const canDoExam = !this.state.loading && studentExams.length == 0;
     const studentExam = studentExams[0];
+    const loading = this.state.loadingFeedback || this.state.loading || this.state.loadingAttendance;
+
+    console.log("studentExam", studentExam)
 
     return (
       <View style={{flex: 1, flexDirection: 'column'}}>
@@ -185,7 +204,7 @@ export class LessonScreen extends React.Component {
         </View>
         
 
-        <ScrollView>
+        {loading ? <ActivityIndicator style={{ marginTop: 20 }} /> : <ScrollView>
           {lesson.exam_enabled == true && canDoExam && <View style={style.exam}>
             <Text text60 style={style.examText}>Esta clase tiene un examen asignado</Text>
             {this.state.loading ? <ActivityIndicator color="#ffffff" style={{ marginTop: 10 }}/> : 
@@ -193,21 +212,7 @@ export class LessonScreen extends React.Component {
                 style={style.examButton}
                 text70
                 label={this.state.loading ? "" : "Realizar examen"}
-                onPress={() =>
-                  Alert.alert(
-                    '¡Atención!',
-                    'No podrás salir del examen antes de finalizar el mismo. Tampoco podrás cambiar de pestaña o el examen se anulará',
-                    [
-                      {text: 'Cancelar', onPress: () => console.log('Cancel Pressed'), style: 'cancel'},
-                      {text: 'Continuar', onPress: () => navigation.navigate('Exam', { 
-                        lesson,
-                        onFinish: () => {
-                          this.loadLesson(this.state.currentClass)
-                        }
-                      })},
-                    ],
-                    { cancelable: false }
-                  )}
+                onPress={() => resolveExam }
                 title="Examen"
                 disabled={this.state.loading}
               />
@@ -223,15 +228,14 @@ export class LessonScreen extends React.Component {
               {lesson.exam_enabled && <Cell
                 cellStyle="RightDetail"
                 title="Examen de clase"
-                detail={this.state.loading && !studentExam ? "" : studentExam.exam.title}
-                cellAccessoryView={this.state.loading ? <ActivityIndicator /> : null}
-                onPress={() => navigation.push('ViewExam', { exam: studentExam })}
+                accessory={studentExam ? null : "DisclosureIndicator"}
+                detail={!studentExam ? "Resolver" : studentExam.exam.title}
+                onPress={() => studentExam ? navigation.push('ViewExam', { exam: studentExam }) : this.resolveExam()}
               />}
               <Cell
                 cellStyle="RightDetail"
                 title="Asistencia"
-                detail={this.state.loadingAttendance ? "" : attendanceMsg}
-                cellAccessoryView={this.state.loadingAttendance ? <ActivityIndicator /> : null}
+                detail={attendanceMsg}
               />
               <Cell
                 cellStyle="RightDetail"
@@ -273,7 +277,7 @@ export class LessonScreen extends React.Component {
               />
             </Section>
           </TableView>
-        </ScrollView>
+        </ScrollView>}
       </View>
     );
   }
