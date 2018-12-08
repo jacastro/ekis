@@ -26,7 +26,7 @@ import { FeedbackScreen } from '../screens/student/Feedback';
 
 const TabNav = createBottomTabNavigator(
   {
-    Lessons: {
+    Cronograma: {
       screen: LessonsScreen,
       path: '/clases',
       navigationOptions: {
@@ -93,7 +93,7 @@ const TabNav = createBottomTabNavigator(
     swipeEnabled: true,
   }
 );
-
+ 
 TabNav.navigationOptions = ({ navigation }) => {
   return {
     title: navigation.state.routes[navigation.state.index].routeName,
