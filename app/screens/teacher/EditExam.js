@@ -5,7 +5,7 @@ import { Cell, TableView, Section, Separator } from 'react-native-tableview-simp
 import { Ionicons } from '@expo/vector-icons';
 import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen, Toast} from 'react-native-ui-lib';//eslint-disable-line
 import * as Animatable from 'react-native-animatable';
-import { getExam, enableExam, getStudentExams } from '../../services/teacher';
+import { getExam, enableExam, getStudentExams, getExamFeedback } from '../../services/teacher';
 export class ExamTeacherScreen extends Component {
   static navigationOptions = ({ navigation }) => {
     return {
@@ -17,12 +17,12 @@ export class ExamTeacherScreen extends Component {
     super(props);
 
     this.state = {
-      //enabled: this.props.navigation.getParam('lesson', {}).exam,
       enabled: true,
       loading: true,
       refreshing: false,
       lesson: props.navigation.getParam('lesson', {}),
-      studentExams: []
+      studentExams: [],
+      feedbacks: []
     };
   }
 
@@ -35,7 +35,10 @@ export class ExamTeacherScreen extends Component {
     getExam(this.state.lesson.exam.id).then((exam) => {
       getStudentExams(this.state.lesson.exam.id).then(studentExams => {
         this.setState({ ...exam, loading: false, refreshing: false, studentExams })
-      }) 
+      });
+      getExamFeedback(this.state.lesson.exam.id).then(feedbacks => {
+        this.setState({ feedbacks })
+      });
     })
   }
 
@@ -52,7 +55,7 @@ export class ExamTeacherScreen extends Component {
   }
 
   render() {
-    const { lesson, enabled, questions, loading, id, studentExams } = this.state;
+    const { lesson, enabled, questions, loading, id, studentExams, feedbacks } = this.state;
     const shouldEnable = questions && questions.length >= 3;
     const shouldEdit = studentExams && studentExams.length == 0;
 
@@ -143,9 +146,21 @@ export class ExamTeacherScreen extends Component {
               <Cell
                 key={studentExam.id}
                 cellStyle="Basic"
-                title={studentExam.id}
-                accessory="DisclosureIndicator"
-                onPress={() => this.props.navigation.navigate('EditExamQuestion', { exam: studentExam })}
+                title={`${studentExam.student.first_name} ${studentExam.student.last_name}`}
+                cellStyle={"RightDetail"}
+                detail={studentExam.student_exam_qualification.score}
+                // accessory="DisclosureIndicator"
+                // onPress={() => this.props.navigation.navigate('EditExamQuestion', { exam: studentExam })}
+              />
+            ))}
+          </Section>
+          <Section header='Comentarios de los alumnos' sectionTintColor='transparent'>
+            {feedbacks.map(feedback => (
+              <Cell
+                key={feedback.id}
+                title={feedback.comments}
+                cellStyle={"RightDetail"}
+                detail={`${feedback.value} ⭐`}
               />
             ))}
           </Section>

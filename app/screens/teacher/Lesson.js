@@ -4,7 +4,7 @@ import {ActivityIndicator, StyleSheet, Alert, Image, ScrollView, Switch, Button,
 import { Cell, TableView, Section, Separator } from 'react-native-tableview-simple';
 import { Ionicons } from '@expo/vector-icons';
 import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen} from 'react-native-ui-lib';//eslint-disable-line
-import { getLesson, updateLesson, deleteLesson } from '../../services/teacher';
+import { getLesson, updateLesson, deleteLesson, getLessonFeedback } from '../../services/teacher';
 
 export class LessonScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -30,6 +30,7 @@ export class LessonScreen extends Component {
       date: new Date(date[0],date[1]-1,date[2]),
       topics_count: lessonShot.topics_count,
       refreshing: false,
+      feedbacks: [],
     };
   }
 
@@ -41,7 +42,9 @@ export class LessonScreen extends Component {
   loadData = () => {
     this.setState({ loading: true })
     getLesson(this.state.lessonShot.id).then((lessonApi) => {
-      this.setState({ lessonApi, loading: false, refreshing: false })
+      getLessonFeedback(this.state.lessonShot.id).then(feedbacks => {
+        this.setState({ lessonApi, feedbacks, loading: false, refreshing: false })
+      })
     })
   }
 
@@ -80,7 +83,7 @@ export class LessonScreen extends Component {
   }
 
   render() {
-    const { lessonShot, lessonApi, lessonChanges, loading } = this.state;
+    const { lessonShot, lessonApi, lessonChanges, loading, feedbacks } = this.state;
     const lesson = { 
       ...lessonShot, 
       ...lessonApi,
@@ -215,6 +218,17 @@ export class LessonScreen extends Component {
               })}
             />
           </Section> }
+
+          <Section header='Comentarios de los alumnos acerca de esta clase' sectionTintColor='transparent'>
+            {feedbacks.map(feedback => (
+              <Cell
+                key={feedback.id}
+                title={feedback.comments}
+                cellStyle={"RightDetail"}
+                detail={`${feedback.value} ⭐`}
+              />
+            ))}
+          </Section>
 
           <Section sectionTintColor='transparent'>
             <Cell

@@ -1,11 +1,11 @@
 import React from 'react';
-import { ScrollView, StatusBar, SectionList,ActivityIndicator, Alert, AppState, Dimensions } from 'react-native';
+import { ScrollView, StatusBar, SectionList,ActivityIndicator, Alert, AppState, Dimensions, AlertIOS } from 'react-native';
 import { Cell, Section, TableView } from 'react-native-tableview-simple';
 import {View, TextInput, Text, Button, ListItem, LoaderScreen, Colors, Card, Avatar, Picker, TagsInput, TextArea} from 'react-native-ui-lib';
 import ProgressBarAnimated from 'react-native-progress-bar-animated';
 import { AnimatedCircularProgress } from 'react-native-circular-progress';
 import { Stars } from './../../components/Stars';
-import { createExam, addExamAnswer, getStudentExam } from '../../services/student';
+import { createExam, addExamAnswer, getStudentExam, saveExamFeedback } from '../../services/student';
 
 const enableButtonColors = [Colors.blue30,Colors.cyan30,Colors.purple30];
 const disableButtonColors = [Colors.blue60,Colors.cyan60,Colors.purple60];
@@ -25,9 +25,11 @@ export class ExamScreen extends React.Component {
       loadingCreatingExam: true,
       loadingAddingAnswer: false,
       loadingFinishingExam: false,
+      loadingAddingFeedback: false,
       timer: 0,
       answerSelected: 0,
       finished: false,
+      result: 0,
     }
     this.addAnswer = this.addAnswer.bind(this);
   }
@@ -105,9 +107,37 @@ export class ExamScreen extends React.Component {
 
   onFinishExam = () => {
     this.setState({ loadingFinishingExam: true });
-    getStudentExam(this.state.studentExamId).then(studentExam => {
-      this.setState({ loadingFinishingExam: false });
+    getStudentExam(this.state.studentExamId).then(result => {
+      console.log(result);
+      this.setState({ loadingFinishingExam: false, result: result.student_exam_qualification.score });
     })
+  }
+
+  onRate = (myRate) => {
+    this.setState({ myRate });
+    AlertIOS.prompt(
+      'Evaluar publicación', 
+      `${myRate} estrella${myRate == 1 ? '' : 's'}`,
+      [
+        {
+          text: 'Cancelar',
+          /*onPress: () => {
+            this.setState({ myRate: previousRate })
+          },*/
+          style: 'cancel',
+        },
+        {
+          text: 'Evaluar',
+          onPress: text => {
+            this.setState({ loadingAddingFeedback: true })
+            saveExamFeedback(this.state.lesson.exam.id, myRate, text).then(() => {
+              this.setState({ loadingAddingFeedback: false }); 
+              this.onClose();
+            }).catch(() => this.setState({ showToast: true}))
+          }
+        },
+      ],
+    );    
   }
 
   onClose = () => {
@@ -116,10 +146,11 @@ export class ExamScreen extends React.Component {
   }
 
   render() {
-    const { current, exam_questions, loadingAddingAnswer, answerSelected, finished, loadingFinishingExam } = this.state;
+    const { current, exam_questions, loadingAddingAnswer, answerSelected, finished, loadingFinishingExam, result } = this.state;
     const question = exam_questions[current];
     const loadingScreen = this.state.loadingCreatingExam; 
     const timerNum = (100 - this.state.timer) / timerFactor;
+    const passExam = result >= 7;
 
     return (
       loadingScreen ? <View style={{ flex: 1, justifyContent: 'center',backgroundColor: "#ffffff" }}>
@@ -144,13 +175,26 @@ export class ExamScreen extends React.Component {
             :
             <View style={{ flex: 4 }}>
               <Text style={{ fontSize: 18, textAlign: "center" }}>¡Examen finalizado!</Text>
-              <Text style={{ fontSize: 70, textAlign: "center", color: Colors.green30 }}>7</Text>
-              <Text style={{ fontSize: 28, textAlign: "center", color: Colors.green10 }}>APROBASTE</Text>
-              <Text text70 marginT-70 marginB-40 style={{ color: Colors.dark30, textAlign: "center" }}>¿Cómo fué tu experiencia?</Text>
-              <Button
-                onPress={() => this.onClose()}
-                label="Cerrar"
-              />
+              <Text style={{ fontSize: 70, textAlign: "center", color: passExam ? Colors.green30 : Colors.red30 }}>{result}</Text>
+              <Text style={{ fontSize: 28, textAlign: "center", color: passExam ? Colors.green10 : Colors.red10 }}>{passExam ? "APROBASTE" : "DESAPROBASTE"}</Text>
+              {this.state.loadingAddingFeedback ? <ActivityIndicator size="large" /> : <View>
+                <Text text70 marginT-70 marginB-10 style={{ color: Colors.dark30, textAlign: "center" }}>¿Cómo fué tu experiencia?</Text>
+                <Stars
+                  disabled={false}
+                  maxStars={5}
+                  rating={0}
+                  emptyStar={'ios-star-outline'}
+                  fullStar={'ios-star'}
+                  halfStar={'ios-star-half'}
+                  iconSet={'Ionicons'}
+                  selectedStar={(myRate) => this.onRate(myRate)}
+                />
+                <Button
+                  marginT-30
+                  onPress={() => this.onClose()}
+                  label="Cerrar"
+                />
+              </View>}
             </View>
           )
         :

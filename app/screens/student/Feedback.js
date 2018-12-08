@@ -5,7 +5,7 @@ import {View, TextInput, Text, Button, ListItem, LoaderScreen, Colors, Card, Ava
 import ProgressBarAnimated from 'react-native-progress-bar-animated';
 import { Stars } from './../../components/Stars';
 
-import { saveLessonFeedback } from '../../services/student';
+import { saveLessonFeedback, saveTeacherFeedback } from '../../services/student';
 
 export class FeedbackScreen extends React.Component {
   constructor(props) {
@@ -31,13 +31,17 @@ export class FeedbackScreen extends React.Component {
 
   onFeedbackTeacher = () => {
     this.setState({ loading: true });
-    this.setState({ loading: false });
-    this.props.navigation.getParam('onFinish', {})();
-    this.props.navigation.goBack();
+    saveTeacherFeedback(this.state.lesson.teacher.id, this.state.rate, this.state.comment).then(feedback => {
+      this.setState({ loading: false });
+      this.props.navigation.getParam('onFinish', {})();
+      this.props.navigation.goBack();
+    })
   }
 
   render() {
     const { rate, comment, lesson, step, loading } = this.state;
+
+    console.log(lesson);
 
     return (
       <View useSafeArea flex style={{ backgroundColor: "#ffffff" }}>

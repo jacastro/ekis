@@ -1,5 +1,5 @@
 import { AsyncStorage } from "react-native"
-import { post } from './rest';
+import { post, get } from './rest';
 
 const routers = {
   Manager: "PreceptorApp",
@@ -55,4 +55,9 @@ export const getUserData = async () => {
 
 export const logout = async () => {
   return await AsyncStorage.removeItem('username').then(AsyncStorage.removeItem('userType'));
+}
+
+export const getFeedback = async (type) => {
+  const user = await getUser();
+  return get(`${type}/${user.id}/feedback`);
 }

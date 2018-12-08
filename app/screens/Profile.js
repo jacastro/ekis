@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, Switch, ActivityIndicator } from 'react-native';
 import { Cell, TableView, Section } from 'react-native-tableview-simple';
 import { View, Button, Text, ListItem, LoaderScreen, Colors} from 'react-native-ui-lib';
-import { logout, getUser } from './../services/common';
+import { logout, getUser, getFeedback } from './../services/common';
 import label from './../utils/label';
 
 export class ProfileScreen extends React.Component {
@@ -18,7 +18,11 @@ export class ProfileScreen extends React.Component {
   };
 
   componentDidMount = () => {
-    getUser().then(data => this.setState(data))
+    getUser().then(data => {
+      this.setState(data)
+      if(data.type === "Teacher")
+        getFeedback("teachers").then(feedbacks => this.setState({feedbacks}));
+    });
   };
 
   logout = () => {
@@ -37,6 +41,18 @@ export class ProfileScreen extends React.Component {
             Aula {this.state.course.classroom}
           </Text>}
         </View>
+        {this.state.feedbacks && <TableView>
+          <Section header='Comentarios de los alumnos' sectionTintColor='transparent'>
+            {this.state.feedbacks.map(feedback => (
+              <Cell
+                key={feedback.id}
+                title={feedback.comments}
+                cellStyle={"RightDetail"}
+                detail={`${feedback.value} ⭐`}
+              />
+            ))}
+          </Section>
+        </TableView>}
         <Button
           fullWidth
           label="Cerrar Sesión"

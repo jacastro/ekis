@@ -226,8 +226,9 @@ export class LessonScreen extends React.Component {
               {lesson.exam_enabled && <Cell
                 cellStyle="RightDetail"
                 title="Examen de clase"
+                titleTextColor={studentExam ? studentExam.student_exam_qualification.score >= 7 ? Colors.green10 : Colors.red10 : null}
                 accessory={studentExam ? null : "DisclosureIndicator"}
-                detail={!studentExam ? "Resolver" : studentExam.exam.title}
+                detail={!studentExam ? "Resolver" : studentExam.student_exam_qualification.score}
                 onPress={() => studentExam ? /* navigation.push('ViewExam', { exam: studentExam }) */ null : this.resolveExam()}
               />}
               <Cell

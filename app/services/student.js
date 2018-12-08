@@ -40,6 +40,16 @@ export const getLessonFeedback = async (lesson_id) => {
   return get(`lessons/${lesson_id}/feedback`, { student_id: user.id });
 }
 
+export const saveExamFeedback = async (exam_id, value, comments) => {
+  const user = await getUser();
+  return post(`exams/${exam_id}/feedback`, { student_id: user.id, value, comments });
+}
+
+export const saveTeacherFeedback = async (teacher_id, value, comments) => {
+  const user = await getUser();
+  return post(`teachers/${teacher_id}/feedback`, { student_id: user.id, value, comments });
+}
+
 
 
 

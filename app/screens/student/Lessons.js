@@ -31,7 +31,6 @@ export class LessonsScreen extends React.Component {
   loadData = () => {
     this.setState({ loading: true })
     getSubjects().then((data) => {
-      console.log("createSubjects", createSubjects());
       const subjects = createSubjects();
       data.forEach(subject => {
         subjects[subject.day].push(subject);

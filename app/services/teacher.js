@@ -59,3 +59,7 @@ export const updateExamQuestion = (exam, question_id, question, options) => {
 export const deleteExamQuestion = (question_id) => del(`exam-questions/${question_id}`);
 
 export const getStudentExams = (exam_id) => get(`student-exams`, { exam_id });
+
+export const getExamFeedback = async (exam_id) => get(`exams/${exam_id}/feedback`);
+
+export const getLessonFeedback = async (lesson_id) => get(`lessons/${lesson_id}/feedback`);
