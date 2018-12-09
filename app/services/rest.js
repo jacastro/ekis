@@ -26,7 +26,7 @@ export const post = async(url, params) => {
     const result = await axios.post(`https://uade-sem-int-tpo-api.herokuapp.com/${url}`, params);
     return result.data;
   } catch (error) {
-    console.error(error);
+    throw Error(error)
   }
 }
 

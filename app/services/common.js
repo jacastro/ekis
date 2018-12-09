@@ -23,7 +23,7 @@ export const login = (data) => {
       course: user.course
     }));
     return routers[user.type];
-  });
+  })
 }
 
 export const getUsername = async () => {

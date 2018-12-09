@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, Switch, StyleSheet, ActivityIndicator } from 'react-native';
 import { Cell, TableView, Section } from 'react-native-tableview-simple';
-import {View, TextInput, Text, Button, ListItem, LoaderScreen, Colors, Card, Avatar, Picker, TagsInput, TextArea} from 'react-native-ui-lib';
+import {View, TextInput, Text, Button, Toast, LoaderScreen, Colors, Card, Avatar, Picker, TagsInput, TextArea} from 'react-native-ui-lib';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { login } from './../services/common';
 
@@ -11,6 +11,8 @@ export class LoginScreen extends React.Component {
     this.state = { 
       userType: "teacher",
       loading: false,
+      passTrans: "",
+      toast: false,
     }
   }
 
@@ -19,7 +21,9 @@ export class LoginScreen extends React.Component {
     login(this.state).then((app) => {
       this.setState({ loading: false });
       this.props.navigation.navigate(app);
-    })
+    }).catch(error => {
+      this.setState({ loading: false, toast: true });
+    });
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -30,34 +34,43 @@ export class LoginScreen extends React.Component {
 
   render() {
     return (
-      <View useSafeArea margin-20>   
-        <Text text20>Iniciar Sesión</Text>
-        <TextInput
-          floatingPlaceholder
-          onChangeText={username => this.setState({ username })}
-          floatOnFocus
-          value={this.state.username}
-          placeholder='DNI'
-        />
+      <View useSafeArea>
+        <View margin-20>   
+          <Text text20>Iniciar Sesión</Text>
+          <TextInput
+            floatingPlaceholder
+            onChangeText={username => this.setState({ username, toast: false })}
+            floatOnFocus
+            value={this.state.username}
+            placeholder='DNI'
+          />
 
-        <TextInput
-          floatingPlaceholder
-          onChangeText={password => this.setState({ password })}
-          floatOnFocus
-          value={this.state.password}
-          placeholder='Contraseña'
-        />
+          <TextInput
+            floatingPlaceholder
+            onChangeText={password => this.setState({ password, toast: false })}
+            floatOnFocus
+            value={this.state.password}
+            placeholder='Contraseña'
+            secureTextEntry={true}
+          />
 
-        <Button
-          backgroundColor={Colors.green40}
-          label={this.state.loading ? "" : "Iniciar Sesión"}
-          disabled={this.state.loading}
-          enableShadow
-          onPress={this.onLogin}
-          style={{marginBottom: 20}}
-        >
-          {this.state.loading && <ActivityIndicator />}
-        </Button>
+          <Button
+            backgroundColor={Colors.green40}
+            label={this.state.loading ? "" : "Iniciar Sesión"}
+            disabled={this.state.loading}
+            enableShadow
+            onPress={this.onLogin}
+          >
+            {this.state.loading && <ActivityIndicator />}
+          </Button>
+        </View>
+        <Toast
+          visible={this.state.toast}
+          position="relative"
+          message="Revisa los datos ingresados y vuelve a intentarlo"
+          backgroundColor={Colors.red10}
+          color={Colors.white}
+        />
       </View>
     )
   }
