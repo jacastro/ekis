@@ -68,7 +68,7 @@ export class ProgramScreen extends React.Component {
             style={style.header_icon}
           />}
         </View>
-        {item.picture_url && <Image source={{uri: item.picture_url}} style={style.image} />}
+        {item.picture_url && <Image source={{uri: item.picture_url}} style={style.image} resizeMode="contain" />}
         <Text style={style.topic_text}>{ item.description }</Text>
         { this.state.loading && <ActivityIndicator/> }
         <View style={style.content}>
@@ -120,7 +120,9 @@ const style = {
   },
   image: {
     marginTop: 24,
-    height: 200
+    width: null,
+    resizeMode: 'contain',
+    height: 220
   },
   topic_title: {
     fontSize: 18,

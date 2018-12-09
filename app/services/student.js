@@ -12,7 +12,7 @@ export const getLesson = (lesson) => get(`lessons/${lesson}`);
 
 export const getAttendance = async (date) => {
   const user = await getUser();
-  return get(`students/${user.id}/attendances`, { date });
+  return get(`students/${user.id}/attendances?date=${date}`, { date });
 }
 
 export const getExam = async (exam_id) => {

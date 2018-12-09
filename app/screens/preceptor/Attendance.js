@@ -34,6 +34,7 @@ export class AttendanceScreen extends React.Component {
     const { courses } = this.state;
     const chosenDate = this.state.chosenDate.toJSON()
     const date = chosenDate.substring(0,chosenDate.indexOf("T"))
+    console.log(date,chosenDate)
 
     return (
       courses && courses.length == 0 ?
@@ -48,6 +49,8 @@ export class AttendanceScreen extends React.Component {
             mode="date"
             date={this.state.chosenDate}
             onDateChange={(date) => this.setDate(date)}
+            locale="es_ar"
+            timeZoneOffsetInMinutes={0}
           />
           <TableView>
             {courses.map(({ id, name, classroom = 'Ninguna', shift, students_count}) =>

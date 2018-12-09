@@ -178,6 +178,8 @@ export class LessonScreen extends Component {
             mode="date"
             date={this.state.date}
             onDateChange={(date) => this.setDate(date)}
+            locale="es_ar"
+            timeZoneOffsetInMinutes={0}
           />
 
           { loading ? <LoaderScreen /> : <Section header="Temas" sectionTintColor='transparent'>

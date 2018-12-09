@@ -114,7 +114,7 @@ export class LessonScreen extends React.Component {
         });
       })
     })
-    getAttendance(lesson.id).then((attendance) => this.setState({ attendance, loadingAttendance: false }))
+    getAttendance(lesson.date).then((attendance) => this.setState({ attendance, loadingAttendance: false }))
     getLessonFeedback(lesson.id).then((feedbacks) => this.setState({ feedback: feedbacks[0], loadingFeedback: false }))
   }
 
@@ -162,7 +162,7 @@ export class LessonScreen extends React.Component {
   render () {
     const navigation = this.props.navigation;
     const { subject, lesson, attendance, studentExams, loadingFeedback, feedback } = this.state;
-    const attendanceMsg = attendance.length > 0 ? attendance[0].present_code : "Ausente";
+    const attendanceMsg = attendance.length > 0 ? label[attendance[0].present_code] : "Ausente";
     const canDoExam = !this.state.loading && studentExams.length == 0;
     const studentExam = studentExams[0];
     const loading = this.state.loadingFeedback || this.state.loading || this.state.loadingAttendance;

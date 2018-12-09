@@ -11,4 +11,6 @@ module.exports = {
   Manager: "Preceptor",
   Teacher: "Docente",
   Student: "Alumno",
+  half: "Media falta",
+  full: "Presente"
 }
