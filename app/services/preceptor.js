@@ -2,7 +2,7 @@ import { get, post, del } from './rest';
 
 export const getCourses = () => get('courses');
 
-export const getStudents = (course) => get(`students`);
+export const getStudents = (course) => get(`courses/${course}/students`);
 
 export const getAttendance = async (course, date) => {
   const students = await getStudents(course);
@@ -19,8 +19,6 @@ export const getAttendance = async (course, date) => {
       attendance_id: att.length === 0 ? null : att[0].id,
     };
   });
-
-  console.log(response);
 
   return response;
 };

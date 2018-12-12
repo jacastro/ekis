@@ -3,8 +3,9 @@ import { createBottomTabNavigator } from 'react-navigation';
 import {ActivityIndicator, StyleSheet, Alert, Image, ScrollView, Switch, Button,DatePickerIOS,AlertIOS,RefreshControl} from 'react-native';
 import { Cell, TableView, Section, Separator } from 'react-native-tableview-simple';
 import { Ionicons } from '@expo/vector-icons';
-import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen} from 'react-native-ui-lib';//eslint-disable-line
-import { getLesson, updateLesson, deleteLesson, getLessonFeedback } from '../../services/teacher';
+import { Stars } from './../../components/Stars';
+import {ListItem,  Text,  BorderRadiuses, Colors, ThemeManager, View, TextInput, LoaderScreen, Card} from 'react-native-ui-lib';//eslint-disable-line
+import { getLesson, updateLesson, deleteLesson, getLessonFeedback, getTeacherFeedback } from '../../services/teacher';
 
 export class LessonScreen extends Component {
   static navigationOptions = ({ navigation }) => {
@@ -31,6 +32,7 @@ export class LessonScreen extends Component {
       topics_count: lessonShot.topics_count,
       refreshing: false,
       feedbacks: [],
+      teacherFeedbacks: [],
     };
   }
 
@@ -44,6 +46,9 @@ export class LessonScreen extends Component {
     getLesson(this.state.lessonShot.id).then((lessonApi) => {
       getLessonFeedback(this.state.lessonShot.id).then(feedbacks => {
         this.setState({ lessonApi, feedbacks, loading: false, refreshing: false })
+      })
+      getTeacherFeedback(this.state.lessonShot.id).then(teacherFeedbacks => {
+        this.setState({ teacherFeedbacks })
       })
     })
   }
@@ -83,12 +88,13 @@ export class LessonScreen extends Component {
   }
 
   render() {
-    const { lessonShot, lessonApi, lessonChanges, loading, feedbacks } = this.state;
+    const { lessonShot, lessonApi, lessonChanges, loading, feedbacks, teacherFeedbacks } = this.state;
     const lesson = { 
       ...lessonShot, 
       ...lessonApi,
       ...lessonChanges, 
     }
+    
 
     return (
       <ScrollView 
@@ -221,15 +227,19 @@ export class LessonScreen extends Component {
             />
           </Section> }
 
-          <Section header='Comentarios de los alumnos acerca de esta clase' sectionTintColor='transparent'>
-            {feedbacks.map(feedback => (
-              <Cell
-                key={feedback.id}
-                title={feedback.comments}
-                cellStyle={"RightDetail"}
-                detail={`${feedback.value} ⭐`}
-              />
-            ))}
+          <Section header='Comentarios de los alumnos' sectionTintColor='transparent'>
+            <Cell
+              title="Acerca de esta clase"
+              cellStyle={"RightDetail"}
+              detail={feedbacks.length === 0 ? "Ninguno" : `${feedbacks.reduce((a,b) => a + b.value, 0) / feedbacks.length} ⭐`}
+              onPress={() => feedbacks.length === 0 ? null : this.props.navigation.navigate('Feedback', { feedbacks, teacherFeedbacks })}
+            />
+            <Cell
+              title="Acerca de tu desempeño"
+              cellStyle={"RightDetail"}
+              detail={teacherFeedbacks.length === 0 ? "Ninguno" : `${teacherFeedbacks.reduce((a,b) => a + b.value, 0) / teacherFeedbacks.length} ⭐`}
+              onPress={() => teacherFeedbacks.length === 0 ? null : this.props.navigation.navigate('Feedback', { feedbacks, teacherFeedbacks })}
+            />
           </Section>
 
           <Section sectionTintColor='transparent'>
@@ -255,16 +265,3 @@ export class LessonScreen extends Component {
     );
   }
 }
-
-const styles = StyleSheet.create({
-  image: {
-    width: 54,
-    height: 54,
-    borderRadius: BorderRadiuses.br20,
-    marginHorizontal: 14,
-  },
-  border: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderColor: ThemeManager.dividerColor,
-  },
-});

@@ -15,8 +15,6 @@ export class ViewExamScreen extends Component {
   render() {
     const exams = this.props.navigation.getParam('exam', []);
 
-    console.log(exams);
-
     return (
       <ScrollView>
         <TableView>

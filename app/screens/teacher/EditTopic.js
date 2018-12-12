@@ -44,7 +44,6 @@ export class EditTopicScreen extends Component {
     const { title, description, lesson, id } = this.state;
 
     updateTopic(lesson.id, id, title, description).then((response) => {
-      console.log(response)
       this.setState({ loading: false });
       this.props.navigation.getParam('onSave', {})(response);
       this.props.navigation.goBack();

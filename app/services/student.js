@@ -45,9 +45,9 @@ export const saveExamFeedback = async (exam_id, value, comments) => {
   return post(`exams/${exam_id}/feedback`, { student_id: user.id, value, comments });
 }
 
-export const saveTeacherFeedback = async (teacher_id, value, comments) => {
+export const saveTeacherFeedback = async (teacher_id, value, comments, grouped_lesson_id) => {
   const user = await getUser();
-  return post(`teachers/${teacher_id}/feedback`, { student_id: user.id, value, comments });
+  return post(`teachers/${teacher_id}/feedback`, { student_id: user.id, value, comments, grouped_lesson_id });
 }
 
 

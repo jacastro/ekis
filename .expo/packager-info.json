@@ -3,7 +3,7 @@
   "packagerPort": null,
   "packagerPid": null,
   "devToolsPort": 19002,
-  "expoServerNgrokUrl": "https://bh-ue7.javiacastro.ekis.exp.direct",
-  "packagerNgrokUrl": "https://packager.bh-ue7.javiacastro.ekis.exp.direct",
-  "ngrokPid": 63198
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null
 }

@@ -142,7 +142,9 @@ export class ExamTeacherScreen extends Component {
             />
           </Section>}
           <Section header='Exámenes resueltos' sectionTintColor='transparent'>
-            {studentExams.map(studentExam => (
+            {studentExams.length === 0 ? <Cell
+              title="Sin exámenes resueltos"
+            /> : studentExams.map(studentExam => (
               <Cell
                 key={studentExam.id}
                 cellStyle="Basic"
@@ -155,7 +157,9 @@ export class ExamTeacherScreen extends Component {
             ))}
           </Section>
           <Section header='Comentarios de los alumnos' sectionTintColor='transparent'>
-            {feedbacks.map(feedback => (
+            {studentExams.length === 0 ? <Cell
+              title="Sin comentarios de los alumnos"
+            /> : feedbacks.map(feedback => (
               <Cell
                 key={feedback.id}
                 title={feedback.comments}

@@ -244,7 +244,8 @@ export class LessonScreen extends React.Component {
               <Cell
                 cellStyle={loadingFeedback ? null : "RightDetail"}
                 accessory={feedback ? null : "DisclosureIndicator"}
-                detail={feedback ? `${feedback.value}⭐` : ""}
+                //detail={feedback ? `${feedback.value}⭐` : ""}
+                detail={feedback ? "" : ""}
                 title={feedback ? "Clase evaluada" : "Evaluar clase" + (lesson.teacher ? ` dictada por ${lesson.teacher.first_name} ${lesson.teacher.last_name}` : "")}
                 titleTextColor="#007AFF"
                 onPress={() => feedback ? null : navigation.navigate('Feedback', { 

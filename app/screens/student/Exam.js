@@ -108,7 +108,6 @@ export class ExamScreen extends React.Component {
   onFinishExam = () => {
     this.setState({ loadingFinishingExam: true });
     getStudentExam(this.state.studentExamId).then(result => {
-      console.log(result);
       this.setState({ loadingFinishingExam: false, result: result.student_exam_qualification.score });
     })
   }
@@ -116,7 +115,7 @@ export class ExamScreen extends React.Component {
   onRate = (myRate) => {
     this.setState({ myRate });
     AlertIOS.prompt(
-      'Evaluar publicación', 
+      'Evaluar Examen', 
       `${myRate} estrella${myRate == 1 ? '' : 's'}`,
       [
         {

@@ -31,7 +31,7 @@ export class FeedbackScreen extends React.Component {
 
   onFeedbackTeacher = () => {
     this.setState({ loading: true });
-    saveTeacherFeedback(this.state.lesson.teacher.id, this.state.rate, this.state.comment).then(feedback => {
+    saveTeacherFeedback(this.state.lesson.teacher.id, this.state.rate, this.state.comment, this.state.lesson.id).then(feedback => {
       this.setState({ loading: false });
       this.props.navigation.getParam('onFinish', {})();
       this.props.navigation.goBack();
@@ -40,8 +40,6 @@ export class FeedbackScreen extends React.Component {
 
   render() {
     const { rate, comment, lesson, step, loading } = this.state;
-
-    console.log(lesson);
 
     return (
       <View useSafeArea flex style={{ backgroundColor: "#ffffff" }}>

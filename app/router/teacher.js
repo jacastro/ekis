@@ -21,6 +21,7 @@ import { LessonScreen } from '../screens/teacher/Lesson';
 import { EditTopicScreen } from '../screens/teacher/EditTopic';
 import { ExamTeacherScreen } from '../screens/teacher/EditExam';
 import { EditExamQuestionScreen } from '../screens/teacher/EditExamQuestion';
+import { FeedbackScreen } from '../screens/teacher/Feedback';
 
 const MenuNavigation = createStackNavigator({
   Root: {
@@ -34,6 +35,9 @@ const MenuNavigation = createStackNavigator({
   },
   Exam: {
     screen: ExamTeacherScreen,
+  },
+  Feedback: {
+    screen: FeedbackScreen,
   },
 });
 

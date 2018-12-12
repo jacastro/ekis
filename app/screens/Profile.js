@@ -20,8 +20,8 @@ export class ProfileScreen extends React.Component {
   componentDidMount = () => {
     getUser().then(data => {
       this.setState(data)
-      if(data.type === "Teacher")
-        getFeedback("teachers").then(feedbacks => this.setState({feedbacks}));
+      //if(data.type === "Teacher")
+        //getFeedback("teachers").then(feedbacks => this.setState({feedbacks}));
     });
   };
 
